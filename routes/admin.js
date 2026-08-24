@@ -35,6 +35,10 @@ router.get('/orders', requireAdmin, (req, res) => {
   res.render('admin/orders');
 });
 
+router.get('/billing', requireAdmin, (req, res) => {
+  res.render('admin/billing', { tableId: req.query.tableId || null });
+});
+
 router.get('/billing/:tableId', requireAdmin, (req, res) => {
   res.render('admin/billing', { tableId: req.params.tableId });
 });

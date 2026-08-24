@@ -63,7 +63,7 @@ function renderTables(tables) {
           ${isOccupied ? `
             <div class="flex justify-between items-center mb-2">
               <span class="text-sm text-gray-500"><i class="fa-solid fa-receipt mr-1"></i> Orders:</span>
-              <span class="font-bold text-gray-800">${table.order_count || 0}</span>
+              <span class="font-bold text-gray-800">${table.active_orders || 0}</span>
             </div>
             <div class="flex justify-between items-center">
               <span class="text-sm text-gray-500"><i class="fa-solid fa-indian-rupee-sign mr-1"></i> Total:</span>

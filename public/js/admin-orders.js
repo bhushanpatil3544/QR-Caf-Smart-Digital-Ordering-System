@@ -15,17 +15,8 @@ async function loadOrders() {
     const res = await fetch('/api/orders/active');
     const data = await res.json();
     
-    // Flatten the grouped orders for easier filtering and sorting
-    allOrders = [];
-    data.forEach(tableGroup => {
-      tableGroup.orders.forEach(order => {
-        allOrders.push({
-          ...order,
-          table_number: tableGroup.table_number,
-          table_id: tableGroup.table_id
-        });
-      });
-    });
+    // Use the flat array directly
+    allOrders = data;
     
     // Sort by created_at desc (newest first)
     allOrders.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
@@ -108,7 +99,7 @@ function renderOrders() {
 
     const itemsHtml = order.items.map(i => `
       <div class="flex justify-between py-2 border-b border-gray-50 last:border-0">
-        <span class="text-sm font-medium text-gray-800"><span class="text-cafe-accent mr-1">${i.quantity}x</span> ${i.name}</span>
+        <span class="text-sm font-medium text-gray-800"><span class="text-cafe-accent mr-1">${i.quantity}x</span> ${i.item_name}</span>
       </div>
     `).join('');
 

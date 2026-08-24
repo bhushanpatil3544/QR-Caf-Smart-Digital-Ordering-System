@@ -89,26 +89,27 @@ function renderBill() {
   if (!currentBillData) return;
   
   const d = currentBillData;
+  const status = d.existing_bill?.status || 'unpaid';
   
   // Header
-  document.getElementById('bill-table-number').textContent = d.table_number;
-  document.getElementById('print-table-no').textContent = d.table_number;
-  document.getElementById('bill-session-id').textContent = d.session_id || 'N/A';
+  document.getElementById('bill-table-number').textContent = d.table?.table_number || '';
+  document.getElementById('print-table-no').textContent = d.table?.table_number || '';
+  document.getElementById('bill-session-id').textContent = d.table?.session_id || 'N/A';
   
   // Status badge
   const badge = document.getElementById('bill-status-badge');
-  if (d.status === 'unpaid') {
+  if (status === 'unpaid') {
     badge.textContent = 'Unpaid';
     badge.className = 'px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide bg-amber-100 text-amber-800';
     document.getElementById('btn-generate').classList.remove('hidden');
     document.getElementById('btn-pay').classList.add('hidden');
-  } else if (d.status === 'generated') {
+  } else if (status === 'generated') {
     badge.textContent = 'Bill Generated';
     badge.className = 'px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide bg-blue-100 text-blue-800';
     document.getElementById('btn-generate').classList.add('hidden');
     document.getElementById('btn-pay').classList.remove('hidden');
   } else {
-    badge.textContent = d.status;
+    badge.textContent = status;
   }
   
   // Items
@@ -117,15 +118,16 @@ function renderBill() {
   
   if (d.items && d.items.length > 0) {
     d.items.forEach(item => {
-      const lineTotal = item.quantity * item.unit_price;
+      const unitPrice = item.price_at_order;
+      const lineTotal = item.quantity * unitPrice;
       tbody.innerHTML += `
         <tr class="border-b border-gray-100 last:border-0">
           <td class="py-3 pr-2">
-            <span class="font-medium text-gray-800 block">${item.name}</span>
+            <span class="font-medium text-gray-800 block">${item.item_name}</span>
             ${item.category_name ? `<span class="text-xs text-gray-400">${item.category_name}</span>` : ''}
           </td>
           <td class="py-3 text-center text-sm font-medium text-gray-600">${item.quantity}</td>
-          <td class="py-3 text-right text-sm text-gray-500">₹${item.unit_price.toFixed(2)}</td>
+          <td class="py-3 text-right text-sm text-gray-500">₹${unitPrice.toFixed(2)}</td>
           <td class="py-3 text-right text-sm font-bold text-gray-800">₹${lineTotal.toFixed(2)}</td>
         </tr>
       `;
@@ -135,22 +137,28 @@ function renderBill() {
   }
   
   // Totals
-  document.getElementById('bill-subtotal').textContent = (d.subtotal || 0).toFixed(2);
+  const subtotal = d.calculation?.subtotal || 0;
+  const taxAmount = d.calculation?.taxAmount || 0;
+  const totalAmount = d.calculation?.total || 0;
+  const discountAmount = d.calculation?.discountAmount || 0;
+  const discountPercent = d.existing_bill?.discount_percent || 0;
+
+  document.getElementById('bill-subtotal').textContent = subtotal.toFixed(2);
   
-  if (d.discount_amount > 0) {
+  if (discountAmount > 0) {
     document.getElementById('discount-row').classList.remove('hidden');
-    document.getElementById('discount-percent').textContent = d.discount_percent;
-    document.getElementById('bill-discount-amt').textContent = (d.discount_amount).toFixed(2);
+    document.getElementById('discount-percent').textContent = discountPercent;
+    document.getElementById('bill-discount-amt').textContent = discountAmount.toFixed(2);
   } else {
     document.getElementById('discount-row').classList.add('hidden');
   }
   
-  document.getElementById('bill-tax').textContent = (d.tax_amount || 0).toFixed(2);
-  document.getElementById('bill-total').textContent = (d.total_amount || 0).toFixed(2);
+  document.getElementById('bill-tax').textContent = taxAmount.toFixed(2);
+  document.getElementById('bill-total').textContent = totalAmount.toFixed(2);
 }
 
 async function applyDiscount() {
-  if (!currentBillData || !currentBillData.id) {
+  if (!currentBillData || !currentBillData.existing_bill?.id) {
     showToast('Generate bill first to apply discount', 'error');
     return;
   }
@@ -158,7 +166,7 @@ async function applyDiscount() {
   const pct = parseInt(document.getElementById('discount-input').value) || 0;
   
   try {
-    const res = await fetch(`/api/billing/${currentBillData.id}/discount`, {
+    const res = await fetch(`/api/billing/${currentBillData.existing_bill.id}/discount`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ discount_percent: pct })
