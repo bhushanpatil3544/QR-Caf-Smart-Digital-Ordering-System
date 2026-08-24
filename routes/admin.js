@@ -44,7 +44,19 @@ router.get('/billing/:tableId', requireAdmin, (req, res) => {
 });
 
 router.get('/qr-codes', requireAdmin, (req, res) => {
-  res.render('admin/qr-codes');
+  const os = require('os');
+  let localIp = 'localhost';
+  const interfaces = os.networkInterfaces();
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      if (iface.family === 'IPv4' && !iface.internal) {
+        localIp = iface.address;
+        break;
+      }
+    }
+  }
+  const lanUrl = `http://${localIp}:${config.PORT}`;
+  res.render('admin/qr-codes', { lanUrl });
 });
 
 module.exports = router;

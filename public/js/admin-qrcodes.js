@@ -1,10 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // Try to detect local IP or use current origin
   const baseUrlInput = document.getElementById('base-url');
-  baseUrlInput.value = window.location.origin;
+  if (!baseUrlInput.value) {
+    baseUrlInput.value = window.location.origin;
+  }
 
   document.getElementById('btn-detect-url').addEventListener('click', () => {
     baseUrlInput.value = window.location.origin;
+    generateAllQRCodes();
   });
 
   document.getElementById('btn-generate-all').addEventListener('click', generateAllQRCodes);
