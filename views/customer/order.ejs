@@ -19,7 +19,7 @@
     .slide-up { animation: slideUp 0.3s ease-out; }
     .item-added { animation: pulse 0.3s ease; }
     @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(0.95); } 100% { transform: scale(1); } }
-    .hidden-panel { display: none; }
+    .hidden-panel { display: none !important; }
   </style>
 </head>
 <body class="bg-gray-50 min-h-screen pb-24 font-sans">
@@ -149,7 +149,7 @@
     const TABLE_NUMBER = <%= tableNumber %>;
     const TABLE_ID = <%= tableId %>;
   </script>
-  <script src="/js/customer-order.js"></script>
+  <script src="/js/customer-order.js?v=6"></script>
 <% } %>
 </body>
 </html>
