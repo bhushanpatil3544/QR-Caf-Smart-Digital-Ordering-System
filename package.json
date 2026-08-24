@@ -1,0 +1,21 @@
+{
+  "name": "cafe-qr-system",
+  "version": "1.0.0",
+  "description": "QR-Based Cafe Ordering & Billing System",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "seed": "node db/seed.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.0.0",
+    "ejs": "^3.1.10",
+    "express": "^4.21.0",
+    "express-session": "^1.18.0",
+    "qrcode": "^1.5.4",
+    "uuid": "^10.0.0"
+  },
+  "allowScripts": {
+    "better-sqlite3@11.10.0": true
+  }
+}

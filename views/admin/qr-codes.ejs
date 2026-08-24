@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR Codes - Cafe QR System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { theme: { extend: { colors: { cafe: { dark: '#4A2C2A', medium: '#8B5E3C', light: '#D4A574', cream: '#F5E6D3', accent: '#E8913A' } } } } }</script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/css/styles.css">
+  <!-- Client-side QR generation -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+</head>
+<body class="bg-gray-50 min-h-screen flex">
+  
+  <%- include('../partials/admin-sidebar', { currentPage: 'qrcodes' }) %>
+
+  <main class="flex-1 ml-16 p-6 md:p-8 print-main">
+    
+    <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 hide-on-print">
+      <div>
+        <h1 class="text-3xl font-bold text-cafe-dark">Table QR Codes</h1>
+        <p class="text-gray-500 mt-1">Generate and print QR codes for tables</p>
+      </div>
+      <div class="flex gap-3">
+        <button id="btn-generate-all" class="bg-cafe-medium hover:bg-cafe-dark text-white px-4 py-2 rounded-lg shadow-sm font-medium transition-colors flex items-center gap-2">
+          <i class="fa-solid fa-rotate"></i> Generate
+        </button>
+        <button id="btn-print-all" class="border border-cafe-medium text-cafe-medium hover:bg-cafe-cream px-4 py-2 rounded-lg shadow-sm font-medium transition-colors flex items-center gap-2">
+          <i class="fa-solid fa-print"></i> Print All
+        </button>
+      </div>
+    </header>
+
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8 hide-on-print">
+      <h3 class="text-lg font-medium text-gray-800 mb-3">Server URL Configuration</h3>
+      <p class="text-sm text-gray-500 mb-4">Set the base URL that customers will scan. If you are on a local network, ensure this is your computer's LAN IP address.</p>
+      <div class="flex gap-4 items-end max-w-2xl">
+        <div class="flex-1">
+          <label class="block text-xs font-medium text-gray-700 mb-1">Base URL</label>
+          <input type="text" id="base-url" class="w-full border border-gray-300 rounded-lg px-3 py-2 font-mono text-sm focus:ring-cafe-accent focus:border-cafe-accent bg-gray-50">
+        </div>
+        <button id="btn-detect-url" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-medium transition-colors whitespace-nowrap">
+          Auto Detect
+        </button>
+      </div>
+    </div>
+
+    <!-- QR Grid -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6 qr-grid print-qr-grid" id="qr-grid">
+      <!-- Generated via JS -->
+    </div>
+
+  </main>
+
+  <script src="/js/admin-qrcodes.js"></script>
+</body>
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Order - Table <%= typeof tableNumber !== 'undefined' ? tableNumber : '' %> | Cafe</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { theme: { extend: { colors: { cafe: { dark: '#4A2C2A', medium: '#8B5E3C', light: '#D4A574', cream: '#F5E6D3', accent: '#E8913A' } } } } }</script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    /* Mobile-optimized custom styles */
+    * { -webkit-tap-highlight-color: transparent; }
+    body { overscroll-behavior: none; }
+    .category-scroll { scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
+    .category-scroll::-webkit-scrollbar { display: none; }
+    .cart-badge { animation: bounce 0.3s ease; }
+    @keyframes bounce { 0%,100% { transform: scale(1); } 50% { transform: scale(1.3); } }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    .slide-up { animation: slideUp 0.3s ease-out; }
+    .item-added { animation: pulse 0.3s ease; }
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(0.95); } 100% { transform: scale(1); } }
+    .hidden-panel { display: none; }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen pb-24 font-sans">
+<% if (typeof error !== 'undefined' && error) { %>
+  <div class="flex items-center justify-center min-h-screen">
+    <div class="text-center p-8">
+      <div class="text-6xl mb-4">😕</div>
+      <h1 class="text-2xl font-bold text-gray-800 mb-2">Oops!</h1>
+      <p class="text-gray-600"><%= error %></p>
+    </div>
+  </div>
+<% } else { %>
+  <!-- Header Bar -->
+  <header class="fixed top-0 left-0 right-0 bg-cafe-dark text-white p-4 flex justify-between items-center z-50 shadow-md">
+    <div class="font-bold text-xl"><i class="fa-solid fa-mug-hot mr-2"></i>Cafe</div>
+    <div class="bg-cafe-medium px-3 py-1 rounded-full text-sm font-semibold">Table <%= tableNumber %></div>
+  </header>
+
+  <!-- Category Navigation -->
+  <nav id="category-nav" class="fixed top-[60px] left-0 right-0 bg-cafe-cream z-40 border-b border-gray-200 shadow-sm overflow-hidden">
+    <ul class="flex space-x-2 p-2 overflow-x-auto category-scroll" id="category-list">
+      <!-- Categories injected via JS -->
+    </ul>
+  </nav>
+
+  <!-- Main Content Area -->
+  <main class="pt-[110px] px-4 pb-20" id="main-content">
+    
+    <!-- Previous Orders Section -->
+    <section id="previous-orders-section" class="hidden mb-6 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+      <div class="flex justify-between items-center mb-3">
+        <h2 class="text-lg font-bold text-gray-800">Your Orders</h2>
+        <button id="view-bill-btn" onclick="window.viewBillFn && window.viewBillFn()" class="text-cafe-medium font-semibold text-sm bg-cafe-cream px-3 py-1 rounded-full shadow-sm"><i class="fa-solid fa-receipt mr-1"></i>View Bill</button>
+      </div>
+      <div id="orders-list" class="space-y-3">
+        <!-- Orders injected via JS -->
+      </div>
+      <div id="running-total-banner" class="mt-4 pt-3 border-t border-gray-100 text-right font-bold text-lg text-cafe-dark">
+        Session Total: ₹<span id="session-total">0.00</span>
+      </div>
+    </section>
+
+    <!-- Menu Section -->
+    <div id="menu-container">
+      <!-- Menu items injected via JS -->
+    </div>
+  </main>
+
+  <!-- Cart Summary Bottom Bar -->
+  <div id="cart-summary-bar" class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-40 transform translate-y-full transition-transform duration-300 flex justify-between items-center">
+    <div>
+      <div class="text-sm text-gray-500"><span id="cart-item-count" class="font-bold text-cafe-dark">0</span> items</div>
+      <div class="font-bold text-lg text-cafe-dark">₹<span id="cart-total">0.00</span></div>
+    </div>
+    <button id="view-cart-btn" class="bg-cafe-accent text-white px-6 py-2.5 rounded-full font-bold shadow-md active:bg-orange-600 transition-colors">
+      View Cart <i class="fa-solid fa-arrow-up ml-1"></i>
+    </button>
+  </div>
+
+  <!-- Cart Panel (Slide up) -->
+  <div id="cart-panel" class="fixed inset-0 bg-white z-50 transform translate-y-full transition-transform duration-300 flex flex-col hidden-panel">
+    <div class="p-4 border-b border-gray-200 flex justify-between items-center bg-cafe-cream">
+      <h2 class="font-bold text-xl text-cafe-dark">Your Order</h2>
+      <button id="close-cart-btn" class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 text-gray-600 active:bg-gray-300">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    
+    <div class="flex-1 overflow-y-auto p-4 bg-gray-50" id="cart-items-container">
+      <!-- Cart items injected via JS -->
+    </div>
+
+    <div class="p-4 bg-white border-t border-gray-200">
+      <div class="mb-4">
+        <label for="customer-note" class="block text-sm font-medium text-gray-700 mb-1">Any special requests?</label>
+        <textarea id="customer-note" rows="2" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-cafe-medium focus:border-cafe-medium outline-none" placeholder="E.g., less sugar, extra spicy..."></textarea>
+      </div>
+      
+      <div class="space-y-2 mb-4 text-sm">
+        <div class="flex justify-between text-gray-600">
+          <span>Subtotal</span>
+          <span>₹<span id="cart-subtotal">0.00</span></span>
+        </div>
+        <div class="flex justify-between text-gray-600">
+          <span>Tax (5%)</span>
+          <span>₹<span id="cart-tax">0.00</span></span>
+        </div>
+        <div class="flex justify-between font-bold text-lg text-cafe-dark pt-2 border-t border-gray-100">
+          <span>Total</span>
+          <span>₹<span id="cart-grand-total">0.00</span></span>
+        </div>
+      </div>
+      
+      <button id="place-order-btn" class="w-full bg-cafe-dark text-white font-bold py-3.5 rounded-xl shadow-lg active:bg-gray-800 transition-colors flex justify-center items-center">
+        <span>Place Order</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Bill Modal -->
+  <div id="bill-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden-panel p-4">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div class="p-4 bg-cafe-dark text-white flex justify-between items-center">
+        <h2 class="font-bold text-lg"><i class="fa-solid fa-receipt mr-2"></i>Bill - Table <%= tableNumber %></h2>
+        <button id="close-bill-btn" class="text-white opacity-80 hover:opacity-100">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+      </div>
+      <div class="p-4 overflow-y-auto flex-1" id="bill-content">
+        <!-- Bill content injected via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Call Waiter Button -->
+  <button id="call-waiter-btn" class="fixed bottom-24 right-4 w-12 h-12 bg-white border border-gray-200 text-cafe-medium rounded-full shadow-lg flex items-center justify-center z-30 active:bg-gray-100 transition-colors">
+    <i class="fa-solid fa-bell text-xl"></i>
+  </button>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed top-20 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity duration-300 opacity-0 pointer-events-none text-sm font-medium flex items-center">
+    <span id="toast-icon" class="mr-2"></span>
+    <span id="toast-message"></span>
+  </div>
+
+  <script>
+    const TABLE_NUMBER = <%= tableNumber %>;
+    const TABLE_ID = <%= tableId %>;
+  </script>
+  <script src="/js/customer-order.js"></script>
+<% } %>
+</body>
+</html>

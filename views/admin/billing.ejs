@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Billing - Cafe QR System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { theme: { extend: { colors: { cafe: { dark: '#4A2C2A', medium: '#8B5E3C', light: '#D4A574', cream: '#F5E6D3', accent: '#E8913A' } } } } }</script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="bg-gray-50 min-h-screen flex" data-table-id="<%= typeof tableId !== 'undefined' ? tableId : '' %>">
+  
+  <%- include('../partials/admin-sidebar', { currentPage: 'billing' }) %>
+
+  <main class="flex-1 ml-16 p-6 md:p-8 flex flex-col lg:flex-row gap-6 lg:gap-8 h-screen overflow-hidden print-main">
+    
+    <!-- Left Col: Table Selector -->
+    <div class="w-full lg:w-1/3 xl:w-1/4 flex flex-col h-full bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hide-on-print">
+      <div class="p-4 border-b border-gray-100 bg-gray-50">
+        <h2 class="text-lg font-bold text-cafe-dark flex items-center gap-2">
+          <i class="fa-solid fa-chair text-cafe-medium"></i> Active Tables
+        </h2>
+      </div>
+      <div class="flex-1 overflow-y-auto p-4 custom-scrollbar">
+        <div class="grid grid-cols-2 gap-3" id="table-selector">
+          <div class="col-span-2 text-center py-8 text-gray-400">
+            <i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i>
+            <p class="text-sm">Loading tables...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Col: Bill Details -->
+    <div class="w-full lg:w-2/3 xl:w-3/4 flex flex-col h-full bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden bill-container print-fullscreen">
+      
+      <div id="no-table-selected" class="flex-1 flex flex-col items-center justify-center text-gray-400 hide-on-print">
+        <i class="fa-solid fa-receipt text-6xl mb-4 opacity-20"></i>
+        <h3 class="text-xl font-medium text-gray-500">No Table Selected</h3>
+        <p class="text-sm mt-1">Select an active table from the list to view its bill.</p>
+      </div>
+
+      <div id="bill-view" class="hidden flex-1 flex flex-col h-full">
+        <!-- Print Header -->
+        <div class="hidden print-block text-center mb-6">
+          <h1 class="text-2xl font-bold">☕ Cafe QR System</h1>
+          <p class="text-sm text-gray-500">123 Coffee Street, Bean Town</p>
+          <div class="mt-4 pb-4 border-b border-gray-300 border-dashed flex justify-between text-sm">
+            <span>Date: <span id="print-date"></span></span>
+            <span class="font-bold">Table: <span id="print-table-no"></span></span>
+          </div>
+        </div>
+
+        <!-- UI Header -->
+        <div class="p-6 border-b border-gray-100 flex justify-between items-start bg-gray-50 hide-on-print">
+          <div>
+            <h2 class="text-2xl font-bold text-cafe-dark">Table <span id="bill-table-number" class="text-cafe-accent">--</span></h2>
+            <p class="text-sm text-gray-500 mt-1">Session: <span id="bill-session-id" class="font-mono text-xs">----</span></p>
+          </div>
+          <span id="bill-status-badge" class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide"></span>
+        </div>
+
+        <!-- Items List -->
+        <div class="flex-1 overflow-y-auto p-6 custom-scrollbar">
+          <table class="w-full text-left">
+            <thead>
+              <tr class="border-b border-gray-200 text-gray-500 text-sm">
+                <th class="pb-3 font-medium">Item</th>
+                <th class="pb-3 font-medium text-center">Qty</th>
+                <th class="pb-3 font-medium text-right">Price</th>
+                <th class="pb-3 font-medium text-right">Total</th>
+              </tr>
+            </thead>
+            <tbody id="bill-items" class="text-gray-700">
+              <!-- Items injected via JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Totals & Actions -->
+        <div class="p-6 border-t border-gray-100 bg-gray-50">
+          <div class="flex flex-col md:flex-row justify-between gap-6">
+            
+            <div class="w-full md:w-1/2 space-y-3 hide-on-print">
+              <label class="block text-sm font-medium text-gray-700">Apply Discount (%)</label>
+              <div class="flex gap-2">
+                <input type="number" id="discount-input" min="0" max="100" class="w-24 border border-gray-300 rounded-lg px-3 py-2 text-right focus:ring-cafe-accent focus:border-cafe-accent">
+                <button id="btn-apply-discount" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition-colors text-sm font-medium">Apply</button>
+              </div>
+            </div>
+
+            <div class="w-full md:w-1/2 space-y-2 text-right">
+              <div class="flex justify-between text-gray-600">
+                <span>Subtotal:</span>
+                <span>₹<span id="bill-subtotal">0.00</span></span>
+              </div>
+              <div class="flex justify-between text-green-600 text-sm hidden" id="discount-row">
+                <span>Discount (<span id="discount-percent">0</span>%):</span>
+                <span>-₹<span id="bill-discount-amt">0.00</span></span>
+              </div>
+              <div class="flex justify-between text-gray-600 text-sm">
+                <span>Tax (5% GST):</span>
+                <span>₹<span id="bill-tax">0.00</span></span>
+              </div>
+              <div class="flex justify-between text-2xl font-bold text-cafe-dark pt-3 border-t border-gray-200 mt-3">
+                <span>Grand Total:</span>
+                <span>₹<span id="bill-total">0.00</span></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="mt-8 flex justify-end gap-3 hide-on-print">
+            <button id="btn-print" class="px-4 py-2.5 border border-gray-300 text-gray-700 hover:bg-gray-100 rounded-lg shadow-sm font-medium flex items-center gap-2 transition-colors">
+              <i class="fa-solid fa-print"></i> Print Bill
+            </button>
+            <button id="btn-generate" class="px-4 py-2.5 bg-cafe-medium hover:bg-cafe-dark text-white rounded-lg shadow-sm font-medium flex items-center gap-2 transition-colors">
+              <i class="fa-solid fa-file-invoice"></i> Generate Bill
+            </button>
+            <button id="btn-pay" class="px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-sm font-medium flex items-center gap-2 transition-colors hidden">
+              <i class="fa-solid fa-check-circle"></i> Mark Paid
+            </button>
+          </div>
+        </div>
+
+        <div class="hidden print-block text-center mt-8 pt-4 border-t border-gray-300 border-dashed text-sm text-gray-500">
+          <p>Thank you for visiting!</p>
+          <p>Please visit again</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="fixed top-4 right-4 z-[200] flex flex-col gap-2 hide-on-print"></div>
+
+  <script src="/js/admin-billing.js"></script>
+</body>
+</html>
