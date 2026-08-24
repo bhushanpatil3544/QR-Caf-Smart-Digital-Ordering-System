@@ -563,15 +563,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 500);
   }
 
+  window.closeBillModal = function() {
+    const modal = document.getElementById('bill-modal');
+    if (modal) modal.classList.add('hidden-panel');
+  };
+
   function bindEvents() {
     if (DOM.viewCartBtn) DOM.viewCartBtn.addEventListener('click', openCartPanel);
     if (DOM.closeCartBtn) DOM.closeCartBtn.addEventListener('click', closeCartPanel);
     if (DOM.placeOrderBtn) DOM.placeOrderBtn.addEventListener('click', placeOrder);
     if (DOM.callWaiterBtn) DOM.callWaiterBtn.addEventListener('click', callWaiter);
     if (DOM.viewBillBtn) DOM.viewBillBtn.addEventListener('click', viewBill);
-    if (DOM.closeBillBtn) DOM.closeBillBtn.addEventListener('click', () => {
-      DOM.billModal.classList.add('hidden-panel');
+    if (DOM.closeBillBtn) DOM.closeBillBtn.addEventListener('click', window.closeBillModal);
+    
+    // Close modal on Escape key press
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        window.closeBillModal();
+        closeCartPanel();
+      }
     });
+
     // Expose viewBill globally for inline onclick fallback
     window.viewBillFn = viewBill;
   }

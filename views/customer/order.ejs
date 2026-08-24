@@ -120,11 +120,11 @@
   </div>
 
   <!-- Bill Modal -->
-  <div id="bill-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden-panel p-4">
-    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+  <div id="bill-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden-panel p-4" onclick="if(event.target === this) closeBillModal()">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]" onclick="event.stopPropagation()">
       <div class="p-4 bg-cafe-dark text-white flex justify-between items-center">
         <h2 class="font-bold text-lg"><i class="fa-solid fa-receipt mr-2"></i>Bill - Table <%= tableNumber %></h2>
-        <button id="close-bill-btn" class="text-white opacity-80 hover:opacity-100">
+        <button id="close-bill-btn" onclick="closeBillModal()" class="text-white opacity-80 hover:opacity-100 p-1">
           <i class="fa-solid fa-xmark text-xl"></i>
         </button>
       </div>
